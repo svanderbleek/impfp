@@ -1,0 +1,11 @@
+name: impfp
+version: 0.0.0
+cabal-version: >= 1.2.4
+
+library
+  build-depends:
+    base,
+    mtl,
+    containers,
+    doctest,
+    QuickCheck
