@@ -40,16 +40,20 @@ import Prelude
 
 canonize :: Ord a => [a] -> [Int]
 canonize as =
-  let
-  (s, _) = (flip execState) (empty, 0) $ do
-    forM_ as $ \a -> do
-        (s, c) <- get
-        case lookup a s of
-          Nothing ->
-            modify $ \(s, c) -> (insert a c s, c + 1)
-          _ -> return ()
-  in
+  let (s, _) = execState (canonizeWithStoreAndCounter as) (empty, 0) in
   (\a -> s ! a) <$> as
+
+canonizeWithStoreAndCounter :: Ord a => [a] -> State (Map a Int, Int) ()
+canonizeWithStoreAndCounter [] =
+  return ()
+canonizeWithStoreAndCounter (a:as) = do
+  (s, c) <- get
+  case lookup a s of
+    Nothing ->
+      modify $ \(s, c) -> (insert a c s, c+1)
+    _ -> return ()
+  canonizeWithStoreAndCounter as
+
 
 -- | Leaf Label
 --
@@ -66,13 +70,13 @@ data Tree a
 leafLabel :: Tree a -> Tree (a, Int)
 leafLabel t =
   evalState (labelWithCounter t) 0
-  where
-    labelWithCounter :: Tree a -> State Int (Tree (a, Int))
-    labelWithCounter (Node l r) = do
-      Node <$> (labelWithCounter l) <*> (labelWithCounter r)
-    labelWithCounter (Leaf a) = do
-      c <- get
-      modify (+1)
-      return $ Leaf (a, c)
+
+labelWithCounter :: Tree a -> State Int (Tree (a, Int))
+labelWithCounter (Node l r) =
+  Node <$> (labelWithCounter l) <*> (labelWithCounter r)
+labelWithCounter (Leaf a) = do
+  c <- get
+  modify (+1)
+  return $ Leaf (a, c)
 
 
