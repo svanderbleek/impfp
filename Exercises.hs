@@ -78,5 +78,3 @@ labelWithCounter (Leaf a) = do
   c <- get
   modify (+1)
   return $ Leaf (a, c)
-
-
