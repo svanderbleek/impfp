@@ -40,12 +40,12 @@ import Prelude
 canonize :: Ord a => [a] -> [Int]
 canonize as =
   let
-    (s, _) = (flip execState) (empty, 0) $ do
-      forM_ as (\a -> do
-          (s, c) <- get
-          case lookup a s of
-            Nothing -> modify (\(s, c) ->
-              (insert a c s, c + 1))
-            _ -> return ())
+  (s, _) = (flip execState) (empty, 0) $ do
+    forM_ as $ \a -> do
+        (s, c) <- get
+        case lookup a s of
+          Nothing ->
+            modify $ \(s, c) -> (insert a c s, c + 1)
+          _ -> return ()
   in
   (\a -> s ! a) <$> as
